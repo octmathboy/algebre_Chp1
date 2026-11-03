@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Construction of the Polynomial Ring: explained</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Instrument+Sans:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1f5fd;--ink:#17203a;--mute:#5a6788;--line:#cfd8ee;--def:#e0eafc;--defb:#2f62d0;--ex:#fff;--note:#fde6f0;--noteb:#d6317f;--acc:#2f62d0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{color-scheme:light}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.65 "Source Serif 4",Georgia,serif}
+.wrap{display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px;max-width:1080px;margin:0 auto;padding:32px 20px 80px}
+nav{position:sticky;top:24px;align-self:start;font:500 14px/1.4 "Instrument Sans",system-ui,sans-serif}
+nav b{display:block;font-size:15px;margin-bottom:12px}
+nav a{display:block;color:var(--mute);text-decoration:none;padding:5px 0 5px 12px;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus-visible{color:var(--noteb);border-color:var(--noteb);outline:none}
+nav a.sub{padding-left:24px;font-size:13px}
+main{max-width:70ch}
+h1{font:700 clamp(30px,5vw,44px)/1.15 "Instrument Sans",system-ui,sans-serif;margin:0 0 8px}
+.lead{color:var(--mute);margin:0 0 40px}
+h2{font:700 28px/1.2 "Instrument Sans",system-ui,sans-serif;margin:56px 0 12px;padding-top:24px;border-top:3px solid var(--noteb);color:var(--acc)}
+h3{font:700 20px/1.3 "Instrument Sans",system-ui,sans-serif;margin:32px 0 8px;color:var(--noteb)}
+.def,.ex,.note{border-radius:6px;padding:14px 18px;margin:16px 0}
+.def{background:var(--def);border-left:4px solid var(--defb)}
+.ex{background:var(--ex);border:1px solid var(--line)}
+.note{background:var(--note);border-left:4px solid var(--noteb)}
+.tag{display:block;font:700 13px "Instrument Sans",system-ui,sans-serif;margin-bottom:4px;color:var(--defb)}
+.note .tag{color:var(--noteb)}.ex .tag{color:var(--mute)}
+.def p,.ex p,.note p{margin:6px 0}
+ul{padding-left:22px}li{margin:4px 0}
+.m{font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-style:italic;white-space:nowrap}
+.eq{display:block;text-align:center;margin:10px 0;font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:19px;overflow-x:auto}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;font-size:16px;width:100%}
+td,th{border:1px solid var(--line);padding:6px 10px;text-align:left}
+.tool{background:var(--ex);border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin:20px 0;font-family:"Instrument Sans",system-ui,sans-serif}
+.tool label{font-size:14px;margin-right:10px}
+.tool input{width:80px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);margin-right:14px}
+.tool button{font:inherit;font-weight:700;padding:7px 14px;border:0;border-radius:4px;background:var(--acc);color:var(--bg);cursor:pointer}
+.tool button:focus-visible,.tool input:focus-visible{outline:3px solid var(--noteb);outline-offset:2px}
+.out{margin-top:12px;font-family:"Source Serif 4",Georgia,serif;font-size:17px;min-height:1.6em}
+@media(max-width:820px){.wrap{grid-template-columns:1fr}nav{position:static}nav a.sub{display:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav aria-label="Contents">
+<b>Contents</b>
+<a href="#groups">I. Groups</a>
+<a href="#rings">II. Rings</a>
+<a href="#morph" class="sub">Ring morphisms</a>
+<a href="#ideals">III. Ideals</a>
+<a href="#quot">IV. Quotient rings</a>
+<a href="#poly">V. Polynomial ring</a>
+<a href="#deg" class="sub">Degree &amp; valuation</a>
+<a href="#struct" class="sub">Addition &amp; product</a>
+<a href="#euclid" class="sub">Euclidean division</a>
+</nav>
+<main>
+<h1>Construction of the Polynomial Ring</h1>
+<p class="lead">A guided recap: each definition is followed by what it means in plain words and a worked example. The chapter builds from groups to rings to ideals to quotients, so that polynomials can be defined as a ring.</p>
+
+<section id="groups">
+<h2>I. Groups</h2>
+<div class="def"><span class="tag">Definition 1: Group</span>
+<p>A set <span class="m">G</span> with an operation <span class="m">x ∗ y</span> that stays inside <span class="m">G</span>, such that:</p>
+<ul>
+<li><b>Associativity:</b> <span class="m">x ∗ (y ∗ z) = (x ∗ y) ∗ z</span></li>
+<li><b>Neutral element</b> <span class="m">e</span>: <span class="m">x ∗ e = e ∗ x = x</span> for every <span class="m">x</span></li>
+<li><b>Inverses:</b> every <span class="m">x</span> has an <span class="m">x⁻¹</span> with <span class="m">x ∗ x⁻¹ = x⁻¹ ∗ x = e</span></li>
+</ul>
+<p>If also <span class="m">x ∗ y = y ∗ x</span> for all <span class="m">x, y</span>, the group is <b>commutative</b> (abelian).</p></div>
+<p><b>In words:</b> a group is a set where you can combine things, undo any combination, and there is a "do nothing" element. Order of grouping never matters; order of elements may matter unless the group is abelian.</p>
+<div class="ex"><span class="tag">Examples</span>
+<ul><li><span class="m">(ℤ, +)</span> is abelian: neutral element 0, inverse of <span class="m">x</span> is <span class="m">−x</span>.</li>
+<li>Any vector space under its addition is a group.</li>
+<li><span class="m">GL<sub>n</sub></span>, the invertible <span class="m">n×n</span> matrices under multiplication, is a group (not abelian for <span class="m">n ≥ 2</span>, since <span class="m">AB ≠ BA</span> in general).</li></ul></div>
+
+<div class="def"><span class="tag">Definition 2: Subgroup</span>
+<p>A non-empty subset <span class="m">H ⊂ G</span> is a subgroup if the operation of <span class="m">G</span>, restricted to <span class="m">H</span>, makes <span class="m">H</span> a group.</p></div>
+<p><b>Two points to understand.</b> <i>Non-empty</i>: <span class="m">H ≠ ∅</span>. <i>Restriction</i>: for <span class="m">x, y ∈ H</span> we need <span class="m">x ∗ y ∈ H</span> (closure). Associativity is inherited from <span class="m">G</span>; you only need to check the neutral element and inverses stay in <span class="m">H</span>.</p>
+<div class="ex"><span class="tag">Example: 2ℤ ⊂ ℤ</span>
+<p>Take <span class="m">x = 2k</span>, <span class="m">y = 2m</span>. Then <span class="m">x + y = 2(k+m) ∈ 2ℤ</span>. Also <span class="m">0 = 2·0 ∈ 2ℤ</span> and <span class="m">−x = 2(−k) ∈ 2ℤ</span>. So 2ℤ is a subgroup of ℤ.</p></div>
+<div class="def"><span class="tag">Proposition: one-step test</span>
+<p><span class="m">H</span> is a subgroup of <span class="m">G</span> ⟺ <span class="m">H ≠ ∅</span> and for all <span class="m">x, y ∈ H</span>: <span class="m">x ∗ y⁻¹ ∈ H</span>.</p></div>
+<p>This replaces three checks with one. In <span class="m">(ℤ, +)</span> the "inverse of y" is <span class="m">−y</span>, so the test reads <span class="m">x − y ∈ H</span>.</p>
+<div class="ex"><span class="tag">Example: 2ℤ again</span>
+<p>0 ∈ 2ℤ so it is non-empty. For <span class="m">x = 2k, y = 2m</span>: <span class="m">x − y = 2(k−m) ∈ 2ℤ</span>. Done in two lines.</p></div>
+</section>
+
+<section id="rings">
+<h2>II. Rings</h2>
+<div class="def"><span class="tag">Definition 1: Ring</span>
+<p>A set <span class="m">A</span> with two operations <span class="m">+</span> and <span class="m">∗</span> such that <span class="m">(A, +)</span> is an abelian group (neutral element 0), <span class="m">∗</span> is associative, and <span class="m">∗</span> distributes over <span class="m">+</span>.</p></div>
+<p>A ring is a place where you can add, subtract and multiply, but not necessarily divide. Extra properties give extra names:</p>
+<div class="scroll"><table>
+<tr><th>Name</th><th>Condition</th><th>Meaning</th></tr>
+<tr><td>Unitary</td><td>∃ <span class="m">1<sub>A</sub></span> for <span class="m">∗</span></td><td>multiplication has an identity</td></tr>
+<tr><td>Commutative</td><td><span class="m">a∗b = b∗a</span></td><td>order of factors is irrelevant</td></tr>
+<tr><td>Zero-divisor</td><td><span class="m">a ≠ 0</span>, ∃ <span class="m">b ≠ 0</span>, <span class="m">a∗b = 0</span></td><td>two non-zero things multiply to zero</td></tr>
+<tr><td>Integral domain</td><td>commutative, unitary, no zero-divisors</td><td><span class="m">ab = 0 ⇒ a = 0</span> or <span class="m">b = 0</span></td></tr>
+<tr><td>Field</td><td>ring ≠ {0}, every non-zero element invertible</td><td>you can divide by anything non-zero</td></tr>
+</table></div>
+<p>The invertible elements (<b>units</b>) of <span class="m">A</span> are written <span class="m">A<sup>×</sup></span> or <span class="m">U(A)</span>.</p>
+<div class="def"><span class="tag">Definition 3: Subring</span><p>A subset <span class="m">B ⊂ A</span> that is itself a ring with the same <span class="m">+</span> and <span class="m">∗</span>.</p></div>
+<div class="ex"><span class="tag">Examples</span>
+<ul>
+<li><span class="m">ℤ</span>: commutative, unitary, integral domain, not a field (2 has no inverse in ℤ). Units: <span class="m">ℤ<sup>×</sup> = {−1, 1}</span>.</li>
+<li><span class="m">2ℤ</span>: commutative but <b>no 1</b> (1 is odd), so not unitary and not a field.</li>
+<li><span class="m">M<sub>n</sub>(ℝ)</span>: has zero-divisors (e.g. two non-zero matrices whose product is 0) and is not commutative, so neither integral domain nor field.</li>
+<li><span class="m">ℝ</span> and <span class="m">ℂ</span> are fields.</li>
+<li>Gaussian integers <span class="m">ℤ[i] = {a + ib | a, b ∈ ℤ}</span> are a subring of ℂ: sums and products of such numbers keep integer real and imaginary parts, since <span class="m">i² = −1</span>.</li>
+</ul></div>
+
+<h3 id="morph">Ring homomorphisms</h3>
+<div class="def"><span class="tag">Definition</span>
+<p>A map <span class="m">φ: A → B</span> with <span class="m">φ(x+y) = φ(x)+φ(y)</span> and <span class="m">φ(x∗y) = φ(x)∗φ(y)</span>. It follows that <span class="m">φ(0<sub>A</sub>) = 0<sub>B</sub></span> and <span class="m">φ(−x) = −φ(x)</span>. For unitary rings one also requires <span class="m">φ(1<sub>A</sub>) = 1<sub>B</sub></span>.</p></div>
+<p>A morphism is a map that respects both operations: computing before or after applying <span class="m">φ</span> gives the same result.</p>
+<div class="ex"><span class="tag">Examples</span>
+<ul>
+<li><b>Identity</b> <span class="m">Id<sub>A</sub>(x) = x</span>: trivially preserves sums and products.</li>
+<li><b>Complex conjugation</b> <span class="m">z ↦ z̄</span> on ℂ: <span class="m">(x+y)‾ = x̄ + ȳ</span> and <span class="m">(xy)‾ = x̄ ȳ</span>, and it fixes 0 and 1.</li>
+<li><b>Evaluation</b> <span class="m">E<sub>x₀</sub>(f) = f(x₀)</span> on functions ℝ→ℝ: <span class="m">(f+g)(x₀) = f(x₀)+g(x₀)</span> and the same for products, because functions are added and multiplied pointwise.</li>
+</ul></div>
+</section>
+
+<section id="ideals">
+<h2>III. Ideals</h2>
+<div class="def"><span class="tag">Definition</span>
+<p>Let <span class="m">A</span> be a ring. A <b>left ideal</b> is an additive subgroup <span class="m">I</span> with <span class="m">a∗x ∈ I</span> for all <span class="m">a ∈ A, x ∈ I</span>. A <b>right ideal</b> asks <span class="m">x∗a ∈ I</span>. An <b>ideal</b> is both.</p></div>
+<p><b>Idea:</b> an ideal absorbs multiplication. Multiply anything in <span class="m">I</span> by any element of the whole ring and you stay in <span class="m">I</span>. This is stronger than a subring (which is only closed under products of its own elements).</p>
+<div class="ex"><span class="tag">Example 1: ideals of a field</span>
+<p>{0} and <span class="m">A</span> are always ideals. In a field they are the <b>only</b> ones: if <span class="m">I</span> contains <span class="m">x ≠ 0</span>, then <span class="m">x</span> is invertible, so <span class="m">1 = x⁻¹∗x ∈ I</span>, and then every <span class="m">a = a∗1 ∈ I</span>, so <span class="m">I = A</span>.</p></div>
+<div class="ex"><span class="tag">Example 2: ideals of ℤ</span>
+<p>Every <span class="m">nℤ</span> is an ideal: for <span class="m">x = mn</span> and any <span class="m">a ∈ ℤ</span>, <span class="m">a∗x = (am)n ∈ nℤ</span>. So 6ℤ is an ideal of ℤ.</p></div>
+<div class="note"><span class="tag">Remember</span>
+<p>An ideal need not be a subring: it does not have to contain 1 (indeed if it contains 1 it is the whole ring). Also, the intersection of any family of left (resp. right) ideals is again a left (resp. right) ideal.</p></div>
+<div class="def"><span class="tag">Ideal generated by a set</span>
+<p>For a non-empty <span class="m">B ⊂ A</span>, the ideal generated by <span class="m">B</span>, written <span class="m">(B)</span>, is the smallest ideal containing <span class="m">B</span>.</p></div>
+<div class="ex"><span class="tag">Example: (4, 6) in ℤ</span>
+<p>Elements are <span class="m">4a + 6b = 2(2a + 3b)</span>. Since <span class="m">2a+3b</span> can be any integer, <span class="m">(4, 6) = 2ℤ = (2)</span>. Likewise <span class="m">6a + 9b = 3(2a+3b)</span> gives <span class="m">(6, 9) = 3ℤ = (3)</span>.</p>
+<p>Pattern: <span class="m">(a, b) = (gcd(a, b))</span> in ℤ. Try it:</p></div>
+<div class="tool">
+<label for="ia">a</label><input id="ia" type="number" value="4">
+<label for="ib">b</label><input id="ib" type="number" value="6">
+<button id="go" type="button">Find the ideal</button>
+<div class="out" id="iout" aria-live="polite"></div>
+</div>
+</section>
+
+<section id="quot">
+<h2>IV. Quotient rings</h2>
+<p>Take a ring <span class="m">A</span> and an ideal <span class="m">I</span>. Declare <span class="m">x ~ y</span> when <span class="m">x − y ∈ I</span>. This is reflexive (<span class="m">x−x = 0 ∈ I</span>), symmetric, and transitive, so it is an equivalence relation. The class of <span class="m">x</span> is written <span class="m">x̄</span>.</p>
+<div class="def"><span class="tag">Quotient ring A/I</span>
+<p>The set of classes, with <span class="m">x̄ + ȳ = (x+y)‾</span> and <span class="m">x̄ ∗ ȳ = (x∗y)‾</span>. These are well defined precisely because <span class="m">I</span> is an ideal: changing representatives by an element of <span class="m">I</span> does not change the result.</p></div>
+<div class="ex"><span class="tag">Example: ℤ/2ℤ and ℤ/6ℤ</span>
+<p>"Same remainder on division by 6" is exactly <span class="m">x − y ∈ 6ℤ</span>. The classes:</p>
+<div class="scroll"><table>
+<tr><th>Class</th><th>Elements</th></tr>
+<tr><td><span class="m">0̄</span></td><td>…, −6, 0, 6, 12, …</td></tr>
+<tr><td><span class="m">1̄</span></td><td>…, −5, 1, 7, 13, …</td></tr>
+<tr><td><span class="m">2̄</span></td><td>…, −4, 2, 8, 14, …</td></tr>
+<tr><td><span class="m">3̄</span></td><td>…, −3, 3, 9, 15, …</td></tr>
+<tr><td><span class="m">4̄</span></td><td>…, −2, 4, 10, 16, …</td></tr>
+<tr><td><span class="m">5̄</span></td><td>…, −1, 5, 11, 17, …</td></tr>
+</table></div>
+<p>So <span class="m">ℤ/6ℤ = {0̄, 1̄, 2̄, 3̄, 4̄, 5̄}</span>; similarly <span class="m">0̄ = 2ℤ</span> and <span class="m">ℤ/2ℤ = {0̄, 1̄}</span> (evens and odds).</p></div>
+</section>
+
+<section id="poly">
+<h2>V. The polynomial ring</h2>
+<p>From here on, <span class="m">K</span> is ℝ, ℚ or ℂ.</p>
+<div class="def"><span class="tag">Definition: polynomial</span>
+<p>A polynomial over <span class="m">K</span> is a sequence <span class="m">P = (a₀, a₁, a₂, …)</span> of elements of <span class="m">K</span> in which only finitely many terms are non-zero (there is an <span class="m">N</span> with <span class="m">a<sub>n</sub> = 0</span> for all <span class="m">n &gt; N</span>). The set of all of them is <span class="m">K[X]</span>.</p></div>
+<p>This is the "construction": a polynomial is <i>defined</i> as its list of coefficients, so <span class="m">(1, 2, 0, 3, 0, 0, …)</span> is the object we usually write <span class="m">1 + 2X + 3X³</span>. The symbol <span class="m">X</span> is just a placeholder for position.</p>
+<ul>
+<li>The <b>zero polynomial</b> has all coefficients 0.</li>
+<li>A <b>constant polynomial</b> is <span class="m">(a₀, 0, 0, …)</span>.</li>
+<li><b>Equality:</b> <span class="m">P = Q</span> iff <span class="m">a<sub>n</sub> = b<sub>n</sub></span> for every <span class="m">n</span>.</li>
+</ul>
+
+<h3 id="deg">1) Degree and valuation</h3>
+<div class="def"><span class="tag">Definitions</span>
+<p>For <span class="m">P ≠ 0</span>: <span class="m">deg(P) = max{ n | a<sub>n</sub> ≠ 0 }</span>. Conventions: <span class="m">deg(0) = −∞</span> and <span class="m">v(0) = +∞</span>.</p>
+<p>The <b>constant term</b> is <span class="m">a₀</span>. The <b>leading coefficient</b> is <span class="m">a<sub>d</sub></span> with <span class="m">d = deg P</span>. <span class="m">P</span> is <b>monic</b> if that coefficient is 1. <span class="m">P</span> is a <b>monomial</b> if <span class="m">v(P) = deg(P)</span>.</p></div>
+<div class="note"><span class="tag">About v(P)</span>
+<p>The valuation <span class="m">v(P)</span> is the index of the <i>first</i> non-zero coefficient (the lowest power that appears). The notes use it without defining it. If <span class="m">v(P) = deg(P)</span>, the first and last non-zero terms coincide, so only one term exists: <span class="m">P = aX<sup>n</sup></span>.</p></div>
+<div class="ex"><span class="tag">Example</span>
+<p><span class="m">P = 3X² + X⁵</span>: <span class="m">v(P) = 2</span>, <span class="m">deg(P) = 5</span>, leading coefficient 1, so P is monic but not a monomial. <span class="m">Q = 4X³</span> is a monomial (<span class="m">v = deg = 3</span>).</p></div>
+
+<h3 id="struct">2) Algebraic structure</h3>
+<span class="eq">P + Q = (a<sub>n</sub> + b<sub>n</sub>)<sub>n</sub></span>
+<span class="eq">P ∗ Q = (c<sub>n</sub>)<sub>n</sub>, &nbsp; c<sub>n</sub> = Σ<sub>i=0</sub><sup>n</sup> a<sub>i</sub> b<sub>n−i</sub> = a₀b<sub>n</sub> + a₁b<sub>n−1</sub> + … + a<sub>n</sub>b₀</span>
+<p>Addition is coefficient by coefficient. The product formula is the "expand and collect powers" rule: <span class="m">c<sub>n</sub></span> gathers every pair of terms whose exponents add up to <span class="m">n</span>.</p>
+<div class="ex"><span class="tag">Example</span>
+<p><span class="m">(1 + X)(1 + X) </span> has <span class="m">P = Q = (1, 1, 0, …)</span>. Then <span class="m">c₀ = 1</span>, <span class="m">c₁ = a₀b₁ + a₁b₀ = 2</span>, <span class="m">c₂ = a₁b₁ = 1</span>, giving <span class="m">1 + 2X + X²</span>.</p></div>
+<p><b>Result:</b> <span class="m">K[X]</span> is a commutative unitary ring (the unit is <span class="m">(1, 0, 0, …)</span>) with no zero-divisors, hence an <b>integral domain</b>. The reason: the leading coefficients multiply to a non-zero number, so <span class="m">deg(PQ) = deg P + deg Q</span> for non-zero <span class="m">P, Q</span>. It is <i>not</i> a field: <span class="m">X</span> has no inverse, since the degree of a product of non-zero polynomials is never negative.</p>
+
+<h3>3) Polynomial function</h3>
+<p>Each <span class="m">P</span> gives a function <span class="m">K → K, x ↦ P(x)</span>. Over ℝ, ℚ, ℂ (infinite fields), two polynomials with the same function are equal, but the polynomial itself is the coefficient sequence, not the function.</p>
+
+<h3 id="euclid">4) Euclidean division</h3>
+<div class="def"><span class="tag">Theorem</span>
+<p>For <span class="m">A, B ∈ K[X]</span> with <span class="m">B ≠ 0</span>, there is a <b>unique</b> pair <span class="m">(Q, R)</span> with</p>
+<span class="eq">A = B·Q + R, &nbsp; R = 0 or deg(R) &lt; deg(B).</span></div>
+<p><span class="m">Q</span> is the quotient and <span class="m">R</span> the remainder. This mirrors integer division, with "degree" playing the role of "size". It is what makes <span class="m">K[X]</span> behave like ℤ: every ideal is generated by a single polynomial, and quotients <span class="m">K[X]/(B)</span> are built just like <span class="m">ℤ/nℤ</span>.</p>
+<div class="ex"><span class="tag">Example</span>
+<p>Divide <span class="m">A = X³ + 2X + 1</span> by <span class="m">B = X − 1</span>. Subtracting <span class="m">X²·B</span> leaves <span class="m">X² + 2X + 1</span>; subtracting <span class="m">X·B</span> leaves <span class="m">3X + 1</span>; subtracting <span class="m">3·B</span> leaves <span class="m">4</span>. So <span class="m">Q = X² + X + 3</span>, <span class="m">R = 4</span>, and indeed <span class="m">R = A(1) = 4</span>.</p></div>
+</section>
+</main>
+</div>
+<script>
+(function(){
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t}return a}
+document.getElementById('go').addEventListener('click',function(){
+var a=parseInt(document.getElementById('ia').value,10),b=parseInt(document.getElementById('ib').value,10),o=document.getElementById('iout');
+if(isNaN(a)||isNaN(b)){o.textContent='Enter two whole numbers.';return}
+var g=gcd(a,b);
+o.textContent=g===0?'(0, 0) = {0}, the zero ideal.':'('+a+', '+b+') = ('+g+') = '+g+'ℤ, because gcd('+a+', '+b+') = '+g+'.';
+});
+})();
+</script>
+</body>
+</html>
